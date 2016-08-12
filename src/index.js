@@ -7,7 +7,8 @@ const isobject =
 
 let Schema =
   function (params) {
-    this.required = arrify(params.required)
+    // make required props mutable
+    this.required = arrify(params.required).slice()
     this.data = params.data
   }
 
