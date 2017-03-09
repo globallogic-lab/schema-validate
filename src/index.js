@@ -1,63 +1,96 @@
-const arrify = require('arrify')
-const Iterable = require('object-iterate')
+/* @flow */
 
-const isobject =
-  (value) =>
-    ( typeof value === 'object' && ({}).toString.call(value) === '[object Object]' )
+// Note this is lightweight but not full featured implementation of schema validation
+// Most of features are disabled here
 
-let Schema =
-  function (params) {
-    // make required props mutable
-    this.required = arrify(params.required).slice()
-    this.data = params.data
+class Store {
+  _items: Object
+  _size: number
+  static fromArray: (list: Array<string>) => Store
+
+  constructor() {
+    this._items = {}
+    this._size = 0
   }
 
-var proto = Schema.prototype
+  size(): number {
+    return this._size
+  }
 
-proto.validate =
-  function (obj) {
+  get(key: string): any {
+    if (({}).hasOwnProperty(this._items, key) && this._items[key]) {
+      return this._items[key]
+    }
+  }
 
-    const validatableProp =
-      (property) =>
-         property in this.data
+  set(key: string, value: any): Store {
+    this._items[key] = value
+    this._size += 1
+    return this
+  }
 
+  unset(key: string): Store {
+    // delete is expensive operation
+    // so instead we mark property as nullable value
+    this._items[key] = false
 
-    const requiredProp =
-      (property) =>
-        ( this.required.indexOf(property) > -1 )
+    if (this._size >= 1) {
+      this._size -= 1
+    }
+    return this
+  }
+}
 
+Store.fromArray = function (list: Array<string>): Store {
+  const store = new Store()
 
-    const removeItem =
-      (list, item) =>
-        list.splice(list.indexOf(item), 1)
+  list.forEach(function (item) {
+    store.set(item, true)
+  })
 
+  return store
+}
 
-    const validateProperty =
-      (property, value) => {
-        if ( requiredProp(property) )
-          removeItem(this.required, property)
+export class Schema {
+  data: Object
+  required: Store
+  _errors: Array<Error>
+  _shallowErrors: boolean
 
-        let handler = this.data[property]
+  constructor(schema: Object, shalowErrors?: boolean) {
+    this.required = Store.fromArray(schema.required || [])
+    this.data = schema.data
+    this._shallowErrors = shalowErrors || false
+    this._errors = []
+  }
 
-        if ( handler ) return handler(value)
-
-        return true
+  validate(obj: Object): any {
+    Object.keys(obj).forEach((key) => {
+      const value = obj[key]
+      if (this.required.get(key)) {
+        this.required.unset(key)
       }
 
+      if (this.data[key]) {
+        if (!this.data[key](value)) {
+          const validationError = new Error(`
+            Schema validation error,
+            property: ${key} is invalid.
+          `)
 
-    if ( !isobject(obj) )
-      throw new Error(`error while validating schema, value should be an object`)
-
-    let results = []
-
-    Iterable(obj)
-      .each(
-        (value, key, obj) => {
-          results.push(validateProperty(key, value, obj))
+          if (this._shallowErrors) {
+            this._errors.push(validationError)
+          } else {
+            throw validationError
+          }
         }
-      )
+      }
+    })
 
-    return ( ( results.every(res => res) ) && ( !this.required.length ) )
+    if (!this.required.size()) {
+      return true
+    } else {
+      return false
+    }
   }
-
-module.exports = Schema
+}
