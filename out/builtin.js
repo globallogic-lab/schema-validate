@@ -3,45 +3,21 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.linkSchema = exports.vString = exports.vObject = exports.vNumber = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _validator = require('./validator');
 
-var _ = require('./');
+var _utils = require('./utils');
 
-/**
- * This file defines builtin validators for object schema
- * Each validator has prefix 'v' for easier recognition
- */
+var _ = _interopRequireWildcard(_utils);
 
-/**
- * Private helpers
- */
-
-var x = {};
-
-x.hasProperty = function (value, key) {
-  return {}.hasOwnProperty(value, key) && value[key];
-};
-
-x.isObject = function (value) {
-  return {}.toString.call(value) == '[object Object]' && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == 'object';
-};
-
-x.isArray = function (value) {
-  return false;
-};
-
-/**
- * Data types validators
- */
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 /**
  * Validator for checking string values
  * @param  {any} value
  * @returns boolean
  */
-function vString(value) {
+function _string(value) {
   return typeof value == 'string' && value.length > 0;
 }
 
@@ -50,7 +26,7 @@ function vString(value) {
  * @param  {any} value
  * @returns boolean
  */
-function vNumber(value) {
+function _number(value) {
   return typeof value == 'number';
 }
 
@@ -59,39 +35,34 @@ function vNumber(value) {
  * @param  {any} value
  * @returns boolean
  */
-function vObject(value) {
-  return x.isObject(value);
+function _object(value) {
+  return _.isObject(value);
 }
 
 /**
- * Composed validators
+ * validator for checking array values
+ * @param  {any} value
+ * @returns boolean
  */
-
-/**
- * Util checkers
- */
-
-/**
- * Util helper that link property to another schema
- * @param  {Schema} schema
- * @returns Function
- */
-function linkSchema(schema) {
-  if (!schema) {
-    throw new Error('schema which we refer should be defined');
-  } else if (!(schema instanceof _.Schema)) {
-    throw new Error('value should be a instance of Schema class');
-  }
-
-  return function (data) {
-    console.log(schema);
-    console.log(data);
-    console.log(schema.validate(data));
-    //return schema.validate(data)
-  };
+function _array(value) {
+  return _.isArray(value);
 }
 
-exports.vNumber = vNumber;
-exports.vObject = vObject;
-exports.vString = vString;
-exports.linkSchema = linkSchema;
+/**
+ * Check if value is nullable
+ * @param  {any} value
+ * @returns boolean
+ */
+function _nullable(value) {
+  if (value === null || isNaN(value) || typeof value === 'undefined') return true;
+
+  return !Boolean(value);
+}
+
+exports.default = {
+  Number: _number,
+  Object: _object,
+  String: _string,
+  Array: _array,
+  Nullable: _nullable
+};

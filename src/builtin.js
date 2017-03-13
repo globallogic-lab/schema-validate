@@ -1,40 +1,14 @@
 /* @flow */
 
-import {Schema} from './'
-
-/**
- * This file defines builtin validators for object schema
- * Each validator has prefix 'v' for easier recognition
- */
-
-/**
- * Private helpers
- */
-
-const x = {}
-
-x.hasProperty = function (value: Object, key: string): boolean {
-  return ( ({}).hasOwnProperty(value, key) && value[key] )
-}
-
-x.isObject = function (value: any): boolean {
-  return ({}).toString.call(value) == '[object Object]' && typeof value == 'object'
-}
-
-x.isArray = function (value: any): boolean {
-  return false
-}
-
-/**
- * Data types validators
- */
+import {BaseValidator} from './validator'
+import * as _ from './utils'
 
 /**
  * Validator for checking string values
  * @param  {any} value
  * @returns boolean
  */
-function vString(value: any): boolean {
+function _string(value: any): boolean {
   return ( typeof value == 'string' && value.length > 0 )
 }
 
@@ -43,7 +17,7 @@ function vString(value: any): boolean {
  * @param  {any} value
  * @returns boolean
  */
-function vNumber(value: any): boolean {
+function _number(value: any): boolean {
   return typeof value == 'number'
 }
 
@@ -52,43 +26,35 @@ function vNumber(value: any): boolean {
  * @param  {any} value
  * @returns boolean
  */
-function vObject(value: any): boolean {
-  return x.isObject(value)
+function _object(value: any): boolean {
+  return _.isObject(value)
 }
 
 /**
- * Composed validators
+ * validator for checking array values
+ * @param  {any} value
+ * @returns boolean
  */
-
-
-/**
- * Util checkers
- */
-
-
-/**
- * Util helper that link property to another schema
- * @param  {Schema} schema
- * @returns Function
- */
-function linkSchema(schema: Schema): Function {
-  if (!schema) {
-    throw new Error('schema which we refer should be defined')
-  } else if (!(schema instanceof Schema)) {
-    throw new Error('value should be a instance of Schema class')
-  }
-
-  return function (data: any): boolean {
-    console.log(schema)
-    console.log(data)
-    console.log(schema.validate.call(schema, data))
-    //return schema.validate(data)
-  }
+function _array(value: any): boolean {
+  return _.isArray(value)
 }
 
-export {
-  vNumber,
-  vObject,
-  vString,
-  linkSchema
+/**
+ * Check if value is nullable
+ * @param  {any} value
+ * @returns boolean
+ */
+function _nullable(value: any): boolean {
+  if (value === null || isNaN(value) || typeof value === 'undefined')
+    return true
+
+  return !Boolean(value)
+}
+
+export default {
+  Number: _number,
+  Object: _object,
+  String: _string,
+  Array: _array,
+  Nullable: _nullable
 }
