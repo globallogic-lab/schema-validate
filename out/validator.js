@@ -25,34 +25,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var keys = Object.keys;
 
-var ValidationError = function (_Error) {
-  _inherits(ValidationError, _Error);
-
-  function ValidationError(property) {
-    _classCallCheck(this, ValidationError);
-
-    var msg = ['Schema validation error,', 'property "' + String(property) + '" is invalid'].join(' ');
-
-    var _this = _possibleConstructorReturn(this, (ValidationError.__proto__ || Object.getPrototypeOf(ValidationError)).call(this, msg));
-
-    _this.type = 'ValidationError';
-    return _this;
-  }
-
-  return ValidationError;
-}(Error);
+/**
+ * Get validation error message
+ * @param  {string} property
+ * @returns string
+ */
+function getError(property) {
+  return ['Schema validation error,', 'property "' + String(property) + '" is invalid'].join(' ');
+}
 
 /**
  * Base validator class object
  * @class BaseValidator
  */
-
 
 var BaseValidator = exports.BaseValidator = function () {
 
@@ -77,12 +64,25 @@ var BaseValidator = exports.BaseValidator = function () {
         if (!(0, _utils.hop)(_aliases2.default, validator)) {
           throw new Error('Can not find alias ' + validator);
         } else if (!_aliases2.default[validator](value)) {
-          this._result.addError(new ValidationError(key).message);
+          this._result.addError(getError(key));
         }
       } else {
         if (!validator(value)) {
-          this._result.addError(new ValidationError(key).message);
+          this._result.addError(getError(key));
         }
+      }
+    }
+  }, {
+    key: '_getRequiredProps',
+    value: function _getRequiredProps() {
+      var _this = this;
+
+      if (this.required.size()) {
+        keys(this.required._items).filter(function (key) {
+          return _this.required.get(key);
+        }).forEach(function (key) {
+          _this._result.addError('Missing required property "' + key + '"');
+        });
       }
     }
 
@@ -100,9 +100,8 @@ var BaseValidator = exports.BaseValidator = function () {
       keys(obj).forEach(function (key) {
         var value = obj[key];
 
-        console.log('required', _this2.required);
         if (_this2.required.get(key)) {
-          //this.required.unset(key)
+          _this2.required.unset(key);
         }
 
         var validators = _this2.properties[key];
@@ -119,6 +118,8 @@ var BaseValidator = exports.BaseValidator = function () {
           _this2._validateSingleProperty(key, value, validators);
         }
       });
+
+      this._getRequiredProps();
 
       return this._result;
     }

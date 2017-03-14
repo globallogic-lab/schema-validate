@@ -5,9 +5,10 @@ describe('Validation', () => {
     expect(validate).toBeDefined()
   })
 
-  it('expect', () => {
-    const obj = {
-      required:  [],
+  // TODO add more convenient test cases
+  it('should properly validate object schema', () => {
+    const Schema = {
+      required:  ['babel', 'name'],
       properties: {
         name: 'string',
         value: ['string', function (value) {
@@ -16,11 +17,25 @@ describe('Validation', () => {
       }
     }
 
-    const result = validate(obj, {
-      name: 'sdfdsf',
-      value: 'as'
-    })
+    const target = {
+      babel: 'cool',
+      name: 'str',
+      value: 'longStr'
+    }
 
-    result.printErrors()
+    expect(validate(Schema, target).errors.length).toEqual(0)
+  })
+
+  it('should properly pass errors', () => {
+    const Schema = {
+      required: ['babel'],
+      name: 'number'
+    }
+
+    const target = {
+      name: 'str'
+    }
+
+    expect(validate(Schema, target).errors.length).toBeGreaterThanOrEqual(1)
   })
 })

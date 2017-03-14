@@ -1,6 +1,6 @@
 /* @flow */
 
-const hop = ({}).hasOwnProperty
+import {hop} from './utils'
 
 /**
  * Custom key value storage object
@@ -33,7 +33,6 @@ export class MapObj {
    * @returns any
    */
   get(key: string): any {
-    console.log(this._items)
     if (hop(this._items, key)) {
       return this._items[key]
     }

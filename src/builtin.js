@@ -45,8 +45,11 @@ function _array(value: any): boolean {
  * @returns boolean
  */
 function _nullable(value: any): boolean {
-  if (value === null || isNaN(value) || typeof value === 'undefined')
-    return true
+  if (
+    value === null ||
+    isNaN(value) ||
+    typeof value === 'undefined'
+  ) return true
 
   return !Boolean(value)
 }

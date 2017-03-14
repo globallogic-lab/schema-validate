@@ -8,17 +8,16 @@ import aliases from './aliases'
 
 const keys = Object.keys
 
-class ValidationError extends Error {
-  type: string
-  constructor(property: string) {
-    const msg = [
-      'Schema validation error,',
-      'property "' + String(property) + '" is invalid'
-    ].join(' ')
-
-    super(msg)
-    this.type = 'ValidationError'
-  }
+/**
+ * Get validation error message
+ * @param  {string} property
+ * @returns string
+ */
+function getError(property: string): string {
+  return [
+    'Schema validation error,',
+    'property "' + String(property) + '" is invalid'
+  ].join(' ')
 }
 
 /**
@@ -42,17 +41,27 @@ export class BaseValidator {
     this._result = new ValidatorResult()
   }
 
-  _validateSingleProperty(key: string, value: any, validator: any) {
+  _validateSingleProperty(key: string, value: any, validator: any): void {
     if (v.String(validator)) {
       if (!hop(aliases,  validator)) {
         throw new Error('Can not find alias ' + validator)
       } else if (!aliases[validator](value)) {
-        this._result.addError((new ValidationError(key)).message)
+        this._result.addError(getError(key))
       }
     } else {
       if (!validator(value)) {
-        this._result.addError((new ValidationError(key)).message)
+        this._result.addError(getError(key))
       }
+    }
+  }
+
+  _getRequiredProps(): void {
+    if (this.required.size()) {
+      keys(this.required._items)
+        .filter(key => this.required.get(key))
+        .forEach((key) => {
+          this._result.addError('Missing required property "' + key + '"')
+        })
     }
   }
 
@@ -65,9 +74,8 @@ export class BaseValidator {
     keys(obj).forEach((key) => {
       const value = obj[key]
 
-      console.log('required', this.required)
       if (this.required.get(key)) {
-        //this.required.unset(key)
+        this.required.unset(key)
       }
 
       const validators = this.properties[key]
@@ -84,6 +92,8 @@ export class BaseValidator {
         this._validateSingleProperty(key, value, validators)
       }
     })
+
+    this._getRequiredProps()
 
     return this._result
   }

@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.MapObj = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 exports.fromArray = fromArray;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _utils = require('./utils');
 
-var hop = {}.hasOwnProperty;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
  * Custom key value storage object
  * @type Map
  */
-
 var MapObj = exports.MapObj = function () {
   function MapObj() {
     _classCallCheck(this, MapObj);
@@ -36,7 +36,7 @@ var MapObj = exports.MapObj = function () {
 
 
   _createClass(MapObj, [{
-    key: "size",
+    key: 'size',
     value: function size() {
       return this._size;
     }
@@ -48,10 +48,9 @@ var MapObj = exports.MapObj = function () {
      */
 
   }, {
-    key: "get",
+    key: 'get',
     value: function get(key) {
-      console.log(this._items);
-      if (hop(this._items, key)) {
+      if ((0, _utils.hop)(this._items, key)) {
         return this._items[key];
       }
     }
@@ -64,7 +63,7 @@ var MapObj = exports.MapObj = function () {
      */
 
   }, {
-    key: "set",
+    key: 'set',
     value: function set(key, value) {
       this._items[key] = value;
       this._size += 1;
@@ -78,7 +77,7 @@ var MapObj = exports.MapObj = function () {
      */
 
   }, {
-    key: "unset",
+    key: 'unset',
     value: function unset(key) {
       // delete is expensive operation
       // so instead we mark property as undefined value
