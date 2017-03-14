@@ -1,6 +1,6 @@
 {
   "name": "@gljs/schema-validator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "validate object schema",
   "main": "out/index.js",
   "directories": {
