@@ -1,4 +1,4 @@
-import {validate} from '../'
+import {PropTypes, validate} from '../out'
 
 describe('Validation', () => {
   it('func should be defined', () => {
@@ -7,35 +7,15 @@ describe('Validation', () => {
 
   // TODO add more convenient test cases
   it('should properly validate object schema', () => {
-    const Schema = {
-      required:  ['babel', 'name'],
+    expect(validate({
+      required: ['babel', 'name'],
       properties: {
-        name: 'string',
-        value: ['string', function (value) {
-          return value.length > 3
-        }]
+        name: PropTypes.string,
+        value: PropTypes.arrayOf(PropTypes.number)
       }
-    }
-
-    const target = {
-      babel: 'cool',
-      name: 'str',
-      value: 'longStr'
-    }
-
-    expect(validate(Schema, target).errors.length).toEqual(0)
-  })
-
-  it('should properly pass errors', () => {
-    const Schema = {
-      required: ['babel'],
-      name: 'number'
-    }
-
-    const target = {
-      name: 'str'
-    }
-
-    expect(validate(Schema, target).errors.length).toBeGreaterThanOrEqual(1)
+    }, {
+      name: 'test',
+      value: ['test', 20]
+    }).length).toBeGreaterThanOrEqual(1)
   })
 })
